@@ -1,6 +1,7 @@
 package metric
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -33,9 +34,9 @@ func New(opts ...Option) (*Metric, error) {
 		opt(m)
 	}
 
-	for _, collector := range m.collectors {
+	for name, collector := range m.collectors {
 		if err := m.registry.Register(collector); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("register metric %s: %w", name, err)
 		}
 	}
 

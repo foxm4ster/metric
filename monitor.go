@@ -8,24 +8,24 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-type Option func(*Metric)
+type Option func(*Monitor)
 
-type Item struct {
+type Metric struct {
 	Name       string
 	Collector  prometheus.Collector
 	Middleware func(http.Handler) http.Handler
 }
 
-type Metric struct {
+type Monitor struct {
 	skipPaths   []string
 	collectors  map[string]prometheus.Collector
 	middlewares []func(http.Handler) http.Handler
 	registry    *prometheus.Registry
 }
 
-func New(opts ...Option) (*Metric, error) {
+func New(opts ...Option) (*Monitor, error) {
 
-	m := &Metric{
+	m := &Monitor{
 		registry:   prometheus.NewRegistry(),
 		collectors: make(map[string]prometheus.Collector),
 	}
@@ -43,15 +43,15 @@ func New(opts ...Option) (*Metric, error) {
 	return m, nil
 }
 
-func (m Metric) Middlewares() []func(http.Handler) http.Handler {
+func (m Monitor) Middlewares() []func(http.Handler) http.Handler {
 	return m.middlewares
 }
 
-func (m Metric) Expose() http.Handler {
+func (m Monitor) Expose() http.Handler {
 	return promhttp.HandlerFor(m.registry, promhttp.HandlerOpts{})
 }
 
-func attachItems(m *Metric, items ...Item) {
+func attachItems(m *Monitor, items ...Metric) {
 	for _, i := range items {
 		if _, ok := m.collectors[i.Name]; !ok {
 			m.collectors[i.Name] = i.Collector

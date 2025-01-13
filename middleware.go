@@ -20,7 +20,7 @@ func (w statusResponseWriter) WriteHeader(code int) {
 	w.ResponseWriter.WriteHeader(code)
 }
 
-func requestTotal(skipPaths []string) Item {
+func requestTotal(skipPaths []string) Metric {
 	name := "request_total"
 	vec := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
@@ -47,14 +47,14 @@ func requestTotal(skipPaths []string) Item {
 		return http.HandlerFunc(fn)
 	}
 
-	return Item{
+	return Metric{
 		Name:       name,
 		Collector:  vec,
 		Middleware: mw,
 	}
 }
 
-func requestDuration(skipPaths []string, buckets []float64) Item {
+func requestDuration(skipPaths []string, buckets []float64) Metric {
 	name := "request_duration"
 	vec := prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
@@ -81,14 +81,14 @@ func requestDuration(skipPaths []string, buckets []float64) Item {
 		return http.HandlerFunc(fn)
 	}
 
-	return Item{
+	return Metric{
 		Name:       name,
 		Collector:  vec,
 		Middleware: mw,
 	}
 }
 
-func slowRequestTotal(skipPaths []string, slowTime time.Duration) Item {
+func slowRequestTotal(skipPaths []string, slowTime time.Duration) Metric {
 	name := "slow_request_total"
 	vec := prometheus.NewCounterVec(
 		prometheus.CounterOpts{
@@ -118,7 +118,7 @@ func slowRequestTotal(skipPaths []string, slowTime time.Duration) Item {
 		return http.HandlerFunc(fn)
 	}
 
-	return Item{
+	return Metric{
 		Name:       name,
 		Collector:  vec,
 		Middleware: mw,

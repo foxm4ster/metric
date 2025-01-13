@@ -7,23 +7,23 @@ import (
 )
 
 // WithSkipPaths should be called first to work for all middlewares
-func WithSkipPaths(paths []string) func(*Metric) {
-	return func(m *Metric) {
+func WithSkipPaths(paths []string) func(*Monitor) {
+	return func(m *Monitor) {
 		m.skipPaths = paths
 	}
 }
 
-func WithCustom(item Item) func(*Metric) {
-	return func(m *Metric) {
+func WithCustom(item Metric) func(*Monitor) {
+	return func(m *Monitor) {
 		attachItems(m, item)
 	}
 }
 
-func WithBasic() func(*Metric) {
+func WithBasic() func(*Monitor) {
 	slowTime := time.Second * 5
 	buckets := []float64{0.1, 0.3, 1.2, 5, 10}
 
-	return func(m *Metric) {
+	return func(m *Monitor) {
 		attachItems(
 			m,
 			slowRequestTotal(m.skipPaths, slowTime),
@@ -33,36 +33,36 @@ func WithBasic() func(*Metric) {
 	}
 }
 
-func WithGoRuntime() func(*Metric) {
-	return func(m *Metric) {
+func WithGoRuntime() func(*Monitor) {
+	return func(m *Monitor) {
 		m.collectors["go"] = collectors.NewGoCollector()
 	}
 }
 
-func WithProcessMetrics() func(*Metric) {
-	return func(m *Metric) {
+func WithProcessMetrics() func(*Monitor) {
+	return func(m *Monitor) {
 		m.collectors["process"] = collectors.NewProcessCollector(collectors.ProcessCollectorOpts{})
 	}
 }
 
-func WithRequestTotal() func(*Metric) {
-	return func(m *Metric) {
+func WithRequestTotal() func(*Monitor) {
+	return func(m *Monitor) {
 		attachItems(m, requestTotal(m.skipPaths))
 	}
 }
 
-func WithRequestDuration(buckets []float64) func(*Metric) {
-	return func(m *Metric) {
+func WithRequestDuration(buckets []float64) func(*Monitor) {
+	return func(m *Monitor) {
 		attachItems(m, requestDuration(m.skipPaths, buckets))
 	}
 }
 
-func WithSlowRequest(slowTime time.Duration) func(*Metric) {
+func WithSlowRequest(slowTime time.Duration) func(*Monitor) {
 	if slowTime <= 0 {
 		slowTime = 5 * time.Second
 	}
 
-	return func(m *Metric) {
+	return func(m *Monitor) {
 		attachItems(m, slowRequestTotal(m.skipPaths, slowTime))
 	}
 }

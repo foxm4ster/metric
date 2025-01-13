@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	mtr, err := metric.New(
+	mtr, err := metric.NewMonitor(
 		metric.WithRequestTotal(),
 		metric.WithSlowRequest(time.Second),
 	)

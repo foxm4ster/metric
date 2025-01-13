@@ -23,7 +23,7 @@ type Monitor struct {
 	registry    *prometheus.Registry
 }
 
-func New(opts ...Option) (*Monitor, error) {
+func NewMonitor(opts ...Option) (*Monitor, error) {
 
 	m := &Monitor{
 		registry:   prometheus.NewRegistry(),

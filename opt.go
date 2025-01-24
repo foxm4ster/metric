@@ -20,14 +20,10 @@ func WithCustom(item Metric) func(*Monitor) {
 }
 
 func WithBasic() func(*Monitor) {
-	slowTime := time.Second * 5
-	buckets := []float64{0.1, 0.3, 1.2, 5, 10}
-
 	return func(m *Monitor) {
-		attachItems(
-			m,
-			slowRequestTotal(m.skipPaths, slowTime),
-			requestDuration(m.skipPaths, buckets),
+		attachItems(m,
+			slowRequestTotal(m.skipPaths, 0),
+			requestDuration(m.skipPaths, nil),
 			requestTotal(m.skipPaths),
 		)
 	}
@@ -66,10 +62,6 @@ func WithRequestDuration(buckets []float64) func(*Monitor) {
 }
 
 func WithSlowRequest(slowTime time.Duration) func(*Monitor) {
-	if slowTime <= 0 {
-		slowTime = 5 * time.Second
-	}
-
 	return func(m *Monitor) {
 		attachItems(m, slowRequestTotal(m.skipPaths, slowTime))
 	}

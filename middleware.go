@@ -55,6 +55,11 @@ func requestTotal(skipPaths []string) Metric {
 }
 
 func requestDuration(skipPaths []string, buckets []float64) Metric {
+
+	if len(buckets) == 0 {
+		buckets = []float64{0.1, 0.3, 1.2, 5, 10}
+	}
+
 	name := "request_duration"
 	vec := prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
@@ -89,6 +94,11 @@ func requestDuration(skipPaths []string, buckets []float64) Metric {
 }
 
 func slowRequestTotal(skipPaths []string, slowTime time.Duration) Metric {
+
+	if slowTime <= 0 {
+		slowTime = 5 * time.Second
+	}
+
 	name := "slow_request_total"
 	vec := prometheus.NewCounterVec(
 		prometheus.CounterOpts{

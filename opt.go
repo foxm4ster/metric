@@ -39,7 +39,7 @@ func WithGoRuntime() func(*Monitor) {
 	}
 }
 
-func WithProcessMetrics() func(*Monitor) {
+func WithProcess() func(*Monitor) {
 	const name = "process"
 
 	return func(m *Monitor) {

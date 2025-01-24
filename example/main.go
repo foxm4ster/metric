@@ -2,7 +2,6 @@ package main
 
 import (
 	"net/http"
-	"time"
 
 	"metric"
 )
@@ -10,8 +9,9 @@ import (
 func main() {
 
 	mtr, err := metric.NewMonitor(
-		metric.WithRequestTotal(),
-		metric.WithSlowRequest(time.Second),
+		metric.WithBasic(),
+		metric.WithGoRuntime(),
+		metric.WithProcess(),
 	)
 	if err != nil {
 		panic(err)

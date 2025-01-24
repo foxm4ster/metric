@@ -34,14 +34,22 @@ func WithBasic() func(*Monitor) {
 }
 
 func WithGoRuntime() func(*Monitor) {
+	const name = "go"
+
 	return func(m *Monitor) {
-		m.collectors["go"] = collectors.NewGoCollector()
+		if _, ok := m.collectors[name]; !ok {
+			m.collectors[name] = collectors.NewGoCollector()
+		}
 	}
 }
 
 func WithProcessMetrics() func(*Monitor) {
+	const name = "process"
+
 	return func(m *Monitor) {
-		m.collectors["process"] = collectors.NewProcessCollector(collectors.ProcessCollectorOpts{})
+		if _, ok := m.collectors[name]; !ok {
+			m.collectors[name] = collectors.NewProcessCollector(collectors.ProcessCollectorOpts{})
+		}
 	}
 }
 

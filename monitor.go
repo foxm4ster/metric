@@ -3,18 +3,13 @@ package metric
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Option func(*Monitor)
-
-type Metric struct {
-	Name       string
-	Collector  prometheus.Collector
-	Middleware func(http.Handler) http.Handler
-}
 
 type Monitor struct {
 	skipPaths   []string
@@ -43,16 +38,88 @@ func NewMonitor(opts ...Option) (*Monitor, error) {
 	return m, nil
 }
 
-func (m Monitor) Middlewares() []func(http.Handler) http.Handler {
+func (m *Monitor) Middlewares() []func(http.Handler) http.Handler {
 	return m.middlewares
 }
 
-func (m Monitor) Expose() http.Handler {
+func (m *Monitor) Expose() http.Handler {
 	return promhttp.HandlerFor(m.registry, promhttp.HandlerOpts{})
 }
 
-func attachItems(m *Monitor, items ...Metric) {
-	for _, i := range items {
+func (m *Monitor) Register(collectors ...prometheus.Collector) error {
+	for _, coll := range collectors {
+		err := m.registry.Register(coll)
+		if err != nil && !strings.Contains(err.Error(), "already exists") {
+			return err
+		}
+	}
+	return nil
+}
+
+func (m *Monitor) CounterVec(name string) *prometheus.CounterVec {
+	coll, ok := m.collectors[name]
+	if !ok {
+		return nil
+	}
+
+	vec, ok := coll.(*prometheus.CounterVec)
+	if !ok {
+		return nil
+	}
+
+	return vec
+}
+
+func (m *Monitor) HistogramVec(name string) *prometheus.HistogramVec {
+	coll, ok := m.collectors[name]
+	if !ok {
+		return nil
+	}
+
+	vec, ok := coll.(*prometheus.HistogramVec)
+	if !ok {
+		return nil
+	}
+
+	return vec
+}
+
+func (m *Monitor) GaugeVec(name string) *prometheus.GaugeVec {
+	coll, ok := m.collectors[name]
+	if !ok {
+		return nil
+	}
+
+	vec, ok := coll.(*prometheus.GaugeVec)
+	if !ok {
+		return nil
+	}
+
+	return vec
+}
+
+func (m *Monitor) SummaryVec(name string) *prometheus.SummaryVec {
+	coll, ok := m.collectors[name]
+	if !ok {
+		return nil
+	}
+
+	vec, ok := coll.(*prometheus.SummaryVec)
+	if !ok {
+		return nil
+	}
+
+	return vec
+}
+
+type Metric struct {
+	Name       string
+	Collector  prometheus.Collector
+	Middleware func(http.Handler) http.Handler
+}
+
+func (m *Monitor) attachMetrics(values ...Metric) {
+	for _, i := range values {
 		if _, ok := m.collectors[i.Name]; !ok {
 			m.collectors[i.Name] = i.Collector
 			m.middlewares = append(m.middlewares, i.Middleware)

@@ -15,13 +15,13 @@ func WithSkipPaths(paths []string) func(*Monitor) {
 
 func WithCustom(fn func() Metric) func(*Monitor) {
 	return func(m *Monitor) {
-		attachItems(m, fn())
+		m.attachMetrics(fn())
 	}
 }
 
 func WithBasic() func(*Monitor) {
 	return func(m *Monitor) {
-		attachItems(m,
+		m.attachMetrics(
 			slowRequestTotal(m.skipPaths, 0),
 			requestDuration(m.skipPaths, nil),
 			requestTotal(m.skipPaths),
@@ -51,18 +51,18 @@ func WithProcess() func(*Monitor) {
 
 func WithRequestTotal() func(*Monitor) {
 	return func(m *Monitor) {
-		attachItems(m, requestTotal(m.skipPaths))
+		m.attachMetrics(requestTotal(m.skipPaths))
 	}
 }
 
 func WithRequestDuration(buckets []float64) func(*Monitor) {
 	return func(m *Monitor) {
-		attachItems(m, requestDuration(m.skipPaths, buckets))
+		m.attachMetrics(requestDuration(m.skipPaths, buckets))
 	}
 }
 
 func WithSlowRequest(slowTime time.Duration) func(*Monitor) {
 	return func(m *Monitor) {
-		attachItems(m, slowRequestTotal(m.skipPaths, slowTime))
+		m.attachMetrics(slowRequestTotal(m.skipPaths, slowTime))
 	}
 }

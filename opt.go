@@ -13,9 +13,9 @@ func WithSkipPaths(paths []string) func(*Monitor) {
 	}
 }
 
-func WithCustom(item Metric) func(*Monitor) {
+func WithCustom(fn func() Metric) func(*Monitor) {
 	return func(m *Monitor) {
-		attachItems(m, item)
+		attachItems(m, fn())
 	}
 }
 

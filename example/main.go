@@ -3,6 +3,8 @@ package main
 import (
 	"net/http"
 
+	"github.com/prometheus/client_golang/prometheus"
+
 	"metric"
 )
 
@@ -12,6 +14,7 @@ func main() {
 		metric.WithBasic(),
 		metric.WithGoRuntime(),
 		metric.WithProcess(),
+		metric.WithCustom(customMetric),
 	)
 	if err != nil {
 		panic(err)
@@ -31,4 +34,29 @@ func main() {
 	http.Handle("/", handler)
 
 	http.ListenAndServe(":8080", nil)
+}
+
+func customMetric() metric.Metric {
+	name := "custom_func"
+	vec := prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: name,
+			Help: "Custom metric desc.",
+		},
+		[]string{"uri", "method"},
+	)
+
+	mw := func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			next.ServeHTTP(w, r)
+			vec.WithLabelValues(r.URL.Path, r.Method).Inc()
+		}
+		return http.HandlerFunc(fn)
+	}
+
+	return metric.Metric{
+		Name:       name,
+		Collector:  vec,
+		Middleware: mw,
+	}
 }

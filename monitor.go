@@ -118,7 +118,7 @@ type Metric struct {
 	Middleware func(http.Handler) http.Handler
 }
 
-func (m *Monitor) attachMetrics(values ...Metric) {
+func (m *Monitor) attach(values ...Metric) {
 	for _, i := range values {
 		if _, ok := m.collectors[i.Name]; !ok {
 			m.collectors[i.Name] = i.Collector

@@ -20,11 +20,7 @@ func main() {
 		panic(err)
 	}
 
-	var handler http.Handler
-
-	handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
+	var handler http.Handler = http.HandlerFunc(example)
 
 	for _, mw := range mtr.Middlewares() {
 		handler = mw(handler)
@@ -34,6 +30,10 @@ func main() {
 	http.Handle("/", handler)
 
 	http.ListenAndServe(":8080", nil)
+}
+
+func example(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
 }
 
 func customMetric() metric.Metric {

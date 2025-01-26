@@ -65,15 +65,15 @@ func NewMonitor(opts ...OptionFunc) (*Monitor, error) {
 	}, nil
 }
 
-func (m *Monitor) Middlewares() []func(http.Handler) http.Handler {
+func (m Monitor) Middlewares() []func(http.Handler) http.Handler {
 	return m.middlewares
 }
 
-func (m *Monitor) Expose() http.Handler {
+func (m Monitor) Expose() http.Handler {
 	return promhttp.HandlerFor(m.registry, promhttp.HandlerOpts{})
 }
 
-func (m *Monitor) Register(collectors ...prometheus.Collector) error {
+func (m Monitor) Register(collectors ...prometheus.Collector) error {
 	for _, coll := range collectors {
 		err := m.registry.Register(coll)
 		if err != nil && !strings.Contains(err.Error(), "already exists") {
@@ -83,7 +83,7 @@ func (m *Monitor) Register(collectors ...prometheus.Collector) error {
 	return nil
 }
 
-func (m *Monitor) CounterVec(name string) *prometheus.CounterVec {
+func (m Monitor) CounterVec(name string) *prometheus.CounterVec {
 	coll, ok := m.collectors[name]
 	if !ok {
 		return nil
@@ -97,7 +97,7 @@ func (m *Monitor) CounterVec(name string) *prometheus.CounterVec {
 	return vec
 }
 
-func (m *Monitor) HistogramVec(name string) *prometheus.HistogramVec {
+func (m Monitor) HistogramVec(name string) *prometheus.HistogramVec {
 	coll, ok := m.collectors[name]
 	if !ok {
 		return nil
@@ -111,7 +111,7 @@ func (m *Monitor) HistogramVec(name string) *prometheus.HistogramVec {
 	return vec
 }
 
-func (m *Monitor) GaugeVec(name string) *prometheus.GaugeVec {
+func (m Monitor) GaugeVec(name string) *prometheus.GaugeVec {
 	coll, ok := m.collectors[name]
 	if !ok {
 		return nil
@@ -125,7 +125,7 @@ func (m *Monitor) GaugeVec(name string) *prometheus.GaugeVec {
 	return vec
 }
 
-func (m *Monitor) SummaryVec(name string) *prometheus.SummaryVec {
+func (m Monitor) SummaryVec(name string) *prometheus.SummaryVec {
 	coll, ok := m.collectors[name]
 	if !ok {
 		return nil

@@ -118,11 +118,18 @@ type Metric struct {
 	Middleware func(http.Handler) http.Handler
 }
 
-func (m *Monitor) attach(values ...Metric) {
-	for _, i := range values {
-		if _, ok := m.collectors[i.Name]; !ok {
-			m.collectors[i.Name] = i.Collector
-			m.middlewares = append(m.middlewares, i.Middleware)
+func (m *Monitor) attach(metrics ...Metric) {
+	for _, metric := range metrics {
+
+		if _, ok := m.collectors[metric.Name]; ok {
+			continue
 		}
+
+		if metric.Middleware == nil || metric.Collector == nil {
+			continue
+		}
+
+		m.collectors[metric.Name] = metric.Collector
+		m.middlewares = append(m.middlewares, metric.Middleware)
 	}
 }

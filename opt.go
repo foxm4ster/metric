@@ -7,62 +7,60 @@ import (
 )
 
 // WithSkipPaths should be called first to work for all middlewares
-func WithSkipPaths(paths []string) func(*Monitor) {
-	return func(m *Monitor) {
-		m.skipPaths = paths
+func WithSkipPaths(paths []string) func(*Options) {
+	return func(o *Options) {
+		o.skipPaths = paths
 	}
 }
 
-func WithCustom(fn func() Metric) func(*Monitor) {
-	return func(m *Monitor) {
-		m.attach(fn())
+func WithCustom(fn func() Metric) func(*Options) {
+	return func(o *Options) {
+		o.metrics = append(o.metrics, fn())
 	}
 }
 
-func WithBasic() func(*Monitor) {
-	return func(m *Monitor) {
-		m.attach(
-			slowRequestTotal(m.skipPaths, 0),
-			requestDuration(m.skipPaths, nil),
-			requestTotal(m.skipPaths),
+func WithBasic() func(*Options) {
+	return func(o *Options) {
+		o.metrics = append(o.metrics,
+			slowRequestTotal(o.skipPaths, 0),
+			requestDuration(o.skipPaths, nil),
+			requestTotal(o.skipPaths),
 		)
 	}
 }
 
-func WithGoRuntime() func(*Monitor) {
-	const name = "go"
-
-	return func(m *Monitor) {
-		if _, ok := m.collectors[name]; !ok {
-			m.collectors[name] = collectors.NewGoCollector()
-		}
+func WithGoRuntime() func(*Options) {
+	return func(o *Options) {
+		o.metrics = append(o.metrics, Metric{
+			Name:      "go",
+			Collector: collectors.NewGoCollector(),
+		})
 	}
 }
 
-func WithProcess() func(*Monitor) {
-	const name = "process"
-
-	return func(m *Monitor) {
-		if _, ok := m.collectors[name]; !ok {
-			m.collectors[name] = collectors.NewProcessCollector(collectors.ProcessCollectorOpts{})
-		}
+func WithProcess() func(*Options) {
+	return func(o *Options) {
+		o.metrics = append(o.metrics, Metric{
+			Name:      "process",
+			Collector: collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
+		})
 	}
 }
 
-func WithRequestTotal() func(*Monitor) {
-	return func(m *Monitor) {
-		m.attach(requestTotal(m.skipPaths))
+func WithRequestTotal() func(*Options) {
+	return func(o *Options) {
+		o.metrics = append(o.metrics, requestTotal(o.skipPaths))
 	}
 }
 
-func WithRequestDuration(buckets []float64) func(*Monitor) {
-	return func(m *Monitor) {
-		m.attach(requestDuration(m.skipPaths, buckets))
+func WithRequestDuration(buckets []float64) func(*Options) {
+	return func(o *Options) {
+		o.metrics = append(o.metrics, requestDuration(o.skipPaths, buckets))
 	}
 }
 
-func WithSlowRequest(slowTime time.Duration) func(*Monitor) {
-	return func(m *Monitor) {
-		m.attach(slowRequestTotal(m.skipPaths, slowTime))
+func WithSlowRequest(slowTime time.Duration) func(*Options) {
+	return func(o *Options) {
+		o.metrics = append(o.metrics, slowRequestTotal(o.skipPaths, slowTime))
 	}
 }

@@ -9,33 +9,60 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-type Option func(*Monitor)
-
-type Monitor struct {
-	skipPaths   []string
-	collectors  map[string]prometheus.Collector
-	middlewares []func(http.Handler) http.Handler
-	registry    *prometheus.Registry
+type Metric struct {
+	Name       string
+	Collector  prometheus.Collector
+	Middleware func(http.Handler) http.Handler
 }
 
-func NewMonitor(opts ...Option) (*Monitor, error) {
+type Options struct {
+	skipPaths []string
+	metrics   []Metric
+}
 
-	m := &Monitor{
-		registry:   prometheus.NewRegistry(),
-		collectors: make(map[string]prometheus.Collector),
-	}
+type OptionFunc func(*Options)
+
+type Monitor struct {
+	registry    *prometheus.Registry
+	collectors  map[string]prometheus.Collector
+	middlewares []func(http.Handler) http.Handler
+}
+
+func NewMonitor(opts ...OptionFunc) (*Monitor, error) {
+
+	options := &Options{}
 
 	for _, opt := range opts {
-		opt(m)
+		opt(options)
 	}
 
-	for name, collector := range m.collectors {
-		if err := m.registry.Register(collector); err != nil {
-			return nil, fmt.Errorf("register metric %s: %w", name, err)
+	var (
+		middlewares []func(http.Handler) http.Handler
+		collectors  = make(map[string]prometheus.Collector)
+		registry    = prometheus.NewRegistry()
+	)
+
+	for _, mtr := range options.metrics {
+		if _, ok := collectors[mtr.Name]; ok {
+			continue
+		}
+
+		if err := registry.Register(mtr.Collector); err != nil {
+			return nil, fmt.Errorf("register '%s' metric: %w", mtr.Name, err)
+		}
+
+		collectors[mtr.Name] = mtr.Collector
+
+		if mtr.Middleware != nil {
+			middlewares = append(middlewares, mtr.Middleware)
 		}
 	}
 
-	return m, nil
+	return &Monitor{
+		registry:    registry,
+		collectors:  collectors,
+		middlewares: middlewares,
+	}, nil
 }
 
 func (m *Monitor) Middlewares() []func(http.Handler) http.Handler {
@@ -110,26 +137,4 @@ func (m *Monitor) SummaryVec(name string) *prometheus.SummaryVec {
 	}
 
 	return vec
-}
-
-type Metric struct {
-	Name       string
-	Collector  prometheus.Collector
-	Middleware func(http.Handler) http.Handler
-}
-
-func (m *Monitor) attach(metrics ...Metric) {
-	for _, metric := range metrics {
-
-		if _, ok := m.collectors[metric.Name]; ok {
-			continue
-		}
-
-		if metric.Middleware == nil || metric.Collector == nil {
-			continue
-		}
-
-		m.collectors[metric.Name] = metric.Collector
-		m.middlewares = append(m.middlewares, metric.Middleware)
-	}
 }

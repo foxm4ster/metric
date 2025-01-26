@@ -15,12 +15,12 @@ type Metric struct {
 	Middleware func(http.Handler) http.Handler
 }
 
-type Options struct {
+type MonitorOptions struct {
 	skipPaths []string
 	metrics   []Metric
 }
 
-type OptionFunc func(*Options)
+type Option func(*MonitorOptions)
 
 type Monitor struct {
 	registry    *prometheus.Registry
@@ -28,9 +28,9 @@ type Monitor struct {
 	middlewares []func(http.Handler) http.Handler
 }
 
-func NewMonitor(opts ...OptionFunc) (*Monitor, error) {
+func NewMonitor(opts ...Option) (*Monitor, error) {
 
-	options := &Options{}
+	options := &MonitorOptions{}
 
 	for _, opt := range opts {
 		opt(options)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -11,7 +12,10 @@ import (
 func main() {
 
 	mtr, err := metric.NewMonitor(
-		metric.WithBasic(),
+		metric.WithSkipPaths("/health"), // should be called first to enable for all metrics
+		metric.WithRequestTotal(),
+		metric.WithSlowRequest(time.Second*10),
+		metric.WithRequestDuration(nil),
 		metric.WithGoRuntime(),
 		metric.WithProcess(),
 		metric.WithCustom(customMetric),

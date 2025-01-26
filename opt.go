@@ -7,7 +7,7 @@ import (
 )
 
 // WithSkipPaths should be called first to work for all middlewares
-func WithSkipPaths(paths []string) func(*Options) {
+func WithSkipPaths(paths ...string) func(*Options) {
 	return func(o *Options) {
 		o.skipPaths = paths
 	}
@@ -16,16 +16,6 @@ func WithSkipPaths(paths []string) func(*Options) {
 func WithCustom(fn func() Metric) func(*Options) {
 	return func(o *Options) {
 		o.metrics = append(o.metrics, fn())
-	}
-}
-
-func WithBasic() func(*Options) {
-	return func(o *Options) {
-		o.metrics = append(o.metrics,
-			slowRequestTotal(o.skipPaths, 0),
-			requestDuration(o.skipPaths, nil),
-			requestTotal(o.skipPaths),
-		)
 	}
 }
 

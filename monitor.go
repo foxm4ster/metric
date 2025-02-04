@@ -37,9 +37,9 @@ func NewMonitor(opts ...Option) (*Monitor, error) {
 	}
 
 	var (
-		middlewares []func(http.Handler) http.Handler
-		collectors  = make(map[string]prometheus.Collector)
 		registry    = prometheus.NewRegistry()
+		collectors  = make(map[string]prometheus.Collector)
+		middlewares []func(http.Handler) http.Handler
 	)
 
 	for _, mtr := range options.metrics {

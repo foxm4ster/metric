@@ -25,7 +25,6 @@ func slowRequestTotal(skipPaths []string, slowTime time.Duration) Metric {
 		[]string{"uri", "method", "code"},
 	)
 	mw := func(next http.Handler) http.Handler {
-
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			if slices.Contains(skipPaths, r.URL.Path) {
 				next.ServeHTTP(w, r)

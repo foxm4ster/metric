@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-
 	mtr, err := metric.NewMonitor(
 		metric.WithSkipPaths("/health"), // should be called first to enable for all metrics
 		metric.WithRequestTotal(),

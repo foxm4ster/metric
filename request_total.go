@@ -17,9 +17,7 @@ func requestTotal(skipPaths []string) Metric {
 		},
 		[]string{"uri", "method", "status_code"},
 	)
-
 	mw := func(next http.Handler) http.Handler {
-
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			if slices.Contains(skipPaths, r.URL.Path) {
 				next.ServeHTTP(w, r)

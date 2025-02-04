@@ -24,7 +24,6 @@ func requestDuration(skipPaths []string, buckets []float64) Metric {
 		[]string{"uri"},
 	)
 	mw := func(next http.Handler) http.Handler {
-
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			if slices.Contains(skipPaths, r.URL.Path) {
 				next.ServeHTTP(w, r)

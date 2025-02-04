@@ -29,7 +29,6 @@ type Monitor struct {
 }
 
 func NewMonitor(opts ...Option) (*Monitor, error) {
-
 	options := &MonitorOptions{}
 
 	for _, opt := range opts {

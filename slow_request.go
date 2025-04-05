@@ -11,7 +11,6 @@ import (
 )
 
 func slowRequestTotal(skipPaths []string, slowTime time.Duration) Metric {
-
 	if slowTime <= 0 {
 		slowTime = 5 * time.Second
 	}

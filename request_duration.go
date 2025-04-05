@@ -9,7 +9,6 @@ import (
 )
 
 func requestDuration(skipPaths []string, buckets []float64) Metric {
-
 	if len(buckets) == 0 {
 		buckets = []float64{0.1, 0.3, 1.2, 5, 10}
 	}
